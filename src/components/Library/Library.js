@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -27,6 +27,8 @@ import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import FlipCameraAndroidIcon from '@material-ui/icons/FlipCameraAndroid';
 import VideocamOffIcon from '@material-ui/icons/VideocamOff';
 import DeleteIcon from '@material-ui/icons/Delete';
+import constants from '../../constants';
+import firebase from "firebase/app";
 
 const messages = [
   {
@@ -74,24 +76,25 @@ const messages = [
     person: 'data:image/jpeg;base64,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',
   },
 ];
+const allTags = constants.allTags
 
 const useStyles = makeStyles((theme) => ({
   text: {
     padding: theme.spacing(2, 2, 0),
   },
   modalPaper: {
-    top:'10%',
-    left:'10%',
-    overflow:'scroll',
-    height:'100%',
-    display:'block',
-     position: 'absolute',
-  //  // width: 400,
-     backgroundColor: theme.palette.background.paper,
-     border: '2px solid #000',
-     boxShadow: theme.shadows[5],
-     padding: theme.spacing(2, 4, 3),
-  //   overflow:'scroll',
+    top: '10%',
+    left: '10%',
+    overflow: 'scroll',
+    height: '100%',
+    display: 'block',
+    position: 'absolute',
+    //  // width: 400,
+    backgroundColor: theme.palette.background.paper,
+    border: '2px solid #000',
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+    //   overflow:'scroll',
   },
   paper: {
     paddingBottom: 50,
@@ -119,24 +122,40 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 function getModalStyle() {
-    const top = 50 ;
-    const left = 50 ;
-  
-    return {
-      top: `${top}%`,
-      left: `${left}%`,
-      transform: `translate(-${top}%, -${left}%)`,
-    };
-  }
+  const top = 50;
+  const left = 50;
+
+  return {
+    top: `${top}%`,
+    left: `${left}%`,
+    transform: `translate(-${top}%, -${left}%)`,
+  };
+}
 export default function BottomAppBar() {
   const classes = useStyles();
   const [modalStyle] = React.useState(getModalStyle);
   const [open, setOpen] = React.useState(false);
-  const [chosenTags,setChosenTags] = useState([]);
+  const [chosenTags, setChosenTags] = useState([]);
   const webcamRef = React.useRef(null);
   const [imgSrc, setImgSrc] = React.useState(null);
-  const [uploadImg,setUploadImg] = useState(null);
-  const [showCamera,setShowCamera] = useState(false);
+  const [uploadImg, setUploadImg] = useState(null);
+  const [showCamera, setShowCamera] = useState(false);
+  const [bookAuthor, setBookAuthor] = useState();
+  const [description, setDescription] = useState();
+  const [bookName, setBookName] = useState();
+  const [videoConstraints, setVideoContraints] = useState("user");
+  const [allAddedBooks, setAllAddedBooks] = useState([])
+
+  useEffect(() => {
+    let user = firebase.auth().currentUser;
+    let userId = user.uid;
+    axios.get('https://6h6nlvoxy8.execute-api.ap-south-1.amazonaws.com/Staging01' + `/user/all-books?userId=${userId}`).then(res => {
+      console.log(res)
+      setAllAddedBooks(res.data)
+    }).catch(err => alert(JSON.stringify(err)))
+
+  }, [])
+
 
   const capture = React.useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
@@ -146,7 +165,6 @@ export default function BottomAppBar() {
   const handleOpen = () => {
     setOpen(true);
   };
-
   const handleClose = () => {
     setOpen(false);
   };
@@ -161,254 +179,132 @@ export default function BottomAppBar() {
     setChosenTags(event)
   }
 
-  
-
-  //const test = ["Comedy","HI","OP","VGL"]
-  const test = [
-    {
-      label:"Comedy",
-      value:"Comedy"
-    },
-    {
-      label:"Horror",
-      value:"Horror"
-    },
-    {
-      label:"New",
-      value:"New"
-    },
-    {
-      label:"Old",
-      value:"Old"
+  const changeCamera = () => {
+    if (videoConstraints.facingMode === 'user') {
+      setVideoContraints({ facingMode: { exact: "environment" } });
     }
-  ]
-  const allTags=[
-    {
-        label:"Action and Adventure",
-        value:"Action and Adventure"
-        },
-    {
-        label:"Classics",
-        value:"Classics"
-        }, 
-    {
-        label:"Comic book or Graphic Novel",
-        value:"Comic book or Graphic Novel"
-        }, 
-    {
-        label:"Detective and Mystery",
-        value:"Detective and Mystery"
-        }, 
-    {
-        label:"Fantasy",
-        value:"Fantasy"
-        },  
-    {
-        label:"Historical Fiction",
-        value:"Historical Fiction"
-        }, 
-    {
-        label:"Horror",
-        value:"Horror"
-        }, 
-    {
-        label:"Literary Fiction",
-        value:"Literary Fiction"
-        }, 
-    {
-        label:"Romance",
-        value:"Romance"
-        }, 
-    {
-        label:"Science Fiction(The Testaments)",
-        value:"Science Fiction(The Testaments)"
-        }, 
-    {
-        label:"Short Stories",
-        value:"Short Stories"
-        }, 
-    {
-        label:"Suspense and Thrillers",
-        value:"Suspense and Thrillers"
-        }, 
-    {
-        label:"Women's Fiction",
-        value:"Women's Fiction"
-        }, 
-    {
-        label:"Biographies and Autobiographies",
-        value:"Biographies and Autobiographies"
-        }, 
-    {
-        label:"Cookbooks",
-        value:"Cookbooks"
-        }, 
-    {
-        label:"Essays",
-        value:"Essays"
-        }, 
-    {
-        label:"History",
-        value:"History"
-        }, 
-    {
-        label:"Memoir",
-        value:"Memoir"
-        }, 
-    {
-        label:"Poetry",
-        value:"Poetry"
-        }, 
-    {
-        label:"Self-Help",
-        value:"Self-Help"
-        }, 
-    {
-        label:"True Crime",
-        value:"True Crime"
-        } 
-    
-    ]
-  
-    const [videoConstraints,setVideoContraints] = useState("user");
-    const changeCamera = () => {
-      if(videoConstraints.facingMode==='user'){
-        setVideoContraints({facingMode: { exact: "environment" }});
-      }
-      else{
-        setVideoContraints({facingMode: 'user'})
-      }
+    else {
+      setVideoContraints({ facingMode: 'user' })
     }
+  }
   const cameraComponents = () => {
-    return(
+    return (
       <>
-    <Grid item xs={12}>
-      <Webcam
-    audio={false}
-    ref={webcamRef}
-    screenshotFormat="image/jpeg"
-    width="100%"
-    height="100%"
-    videoConstraints={videoConstraints}
-  />
- 
-</Grid>
+        <Grid item xs={12}>
+          <Webcam
+            audio={false}
+            ref={webcamRef}
+            screenshotFormat="image/jpeg"
+            width="100%"
+            height="100%"
+            videoConstraints={videoConstraints}
+          />
 
-<IconButton onClick={()=>changeCamera()}>
-<FlipCameraAndroidIcon />
-</IconButton>
-  <button onClick={capture}>Capture photo</button>
-  {imgSrc && (
-    <img
-      src={imgSrc}
-    />
-  )}
-  </>
+        </Grid>
+
+        <IconButton onClick={() => changeCamera()}>
+          <FlipCameraAndroidIcon />
+        </IconButton>
+        <button onClick={capture}>Capture photo</button>
+        {imgSrc && (
+          <img
+            src={imgSrc}
+          />
+        )}
+      </>
     );
-  } 
+  }
   const handleSubmit = () => {
-    
-    const body= {
-      book:{
-        name:'Hello Trial',
-        tags:[]
+
+
+    let user = firebase.auth().currentUser;
+    let userId = user.uid;
+    console.log(bookName, bookAuthor, description, imgSrc)
+
+    let tagsArray = chosenTags.map(tag => tag.value)
+
+    const body = {
+      book: {
+        name: bookName,
+        tags: tagsArray,
+        description: description,
+        author: bookAuthor
       }
-        
-      }
-    
-    axios.post('https://6h6nlvoxy8.execute-api.ap-south-1.amazonaws.com/Staging01'+`/user/pksingh`,body)
-    .then(res => alert(res))
-    .catch(err => console.log(err))
+
+    }
+
+    axios.post('https://6h6nlvoxy8.execute-api.ap-south-1.amazonaws.com/Staging01' + `/user/${userId}`, body)
+      .then(res => alert(res))
+      .catch(err => console.log(err))
   }
   const body = (
     <div style={modalStyle} className={classes.modalPaper}>
       <h1 id="simple-modal-title">Add book to library</h1>
       <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
-          <TextField id="bookName" label="Book Name" variant="outlined" size="small" />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-          <TextField id="bookAuthor" label="Author" variant="outlined" size="small" />
-          </Grid>
-          <Grid item xs={12}>
+        <Grid item xs={12} sm={6}>
+          <TextField onChange={(event) => setBookName(event.target.value)} value={bookName} id="bookName" label="Book Name" variant="outlined" size="small" />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField onChange={(event) => setBookAuthor(event.target.value)} value={bookAuthor} id="bookAuthor" label="Author" variant="outlined" size="small" />
+        </Grid>
+        <Grid item xs={12}>
           <Select
-                isMulti
-                styles={selectStyles}
-                name="Features"
-                value={chosenTags}
-                options={allTags}
-                placeholder="Features(Select multiple)"
-                className="basic-multi-select"
-                onChange={(event) => onTagsChange(event)}
-                classNamePrefix="select"
-              />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-          <TextareaAutosize aria-label="minimum height" style={{width:300}} rowsMin={6} placeholder="Description" />
-          </Grid>
-          
-          <Grid item xs={12}>
-            
-          {!showCamera && <IconButton onClick={()=>setShowCamera(!showCamera)} color="primary" component="span">
-              < CameraAltIcon /> 
+            isMulti
+            styles={selectStyles}
+            name="Features"
+            value={chosenTags}
+            options={allTags}
+            placeholder="Features(Select multiple)"
+            className="basic-multi-select"
+            onChange={(event) => onTagsChange(event)}
+            classNamePrefix="select"
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextareaAutosize onChange={(event) => setDescription(event.target.value)} value={description} aria-label="minimum height" style={{ width: 300 }} rowsMin={6} placeholder="Description" />
+        </Grid>
+
+        <Grid item xs={12}>
+
+          {!showCamera && <IconButton onClick={() => setShowCamera(!showCamera)} color="primary" component="span">
+            < CameraAltIcon />
+          </IconButton>}
+          {showCamera &&
+            <IconButton onClick={() => setShowCamera(!showCamera)} color="primary" component="span">
+              < VideocamOffIcon />
             </IconButton>}
-          {showCamera && 
-          <IconButton onClick={()=>setShowCamera(!showCamera)} color="primary" component="span">
-          < VideocamOffIcon /> 
-        </IconButton>}
-          
-            
+
+
             OR &nbsp; &nbsp;
             <input
-        type="file"
-        onChange={(event) => setUploadImg(event.target.files[0])}
-        id="contained-button-file"
-        style={{ display: 'none' }}
-      />
-      <label htmlFor="contained-button-file">
-        <Button variant="contained" color="primary" component="span">
-          Upload
+            type="file"
+            onChange={(event) => setUploadImg(event.target.files[0])}
+            id="contained-button-file"
+            style={{ display: 'none' }}
+          />
+          <label htmlFor="contained-button-file">
+            <Button variant="contained" color="primary" component="span">
+              Upload
         </Button>
-      </label>
-      {uploadImg && 
-        <>
-          ( {uploadImg.name}<IconButton onClick={()=>setUploadImg(null)} ><DeleteIcon /></IconButton>) 
+          </label>
+          {uploadImg &&
+            <>
+              ( {uploadImg.name}<IconButton onClick={() => setUploadImg(null)} ><DeleteIcon /></IconButton>)
         </>
-      }
-          </Grid>
-          
-          {showCamera && cameraComponents()}
-         {/* {showCamera && <Grid item xs={12}>
-                  <Webcam
-                audio={false}
-                ref={webcamRef}
-                screenshotFormat="image/jpeg"
-                width="100%"
-                height="100%"
-                videoConstraints={videoConstraints}
-              />
-             
-          </Grid>}
-          {showCamera &&
-          <IconButton>
-          <FlipCameraAndroidIcon />
-          </IconButton>}
-              <button onClick={capture}>Capture photo</button>
-              {imgSrc && (
-                <img
-                  src={imgSrc}
-                />
-              )} */}
+          }
+        </Grid>
+
+        {showCamera && cameraComponents()}
       </Grid>
-      <Button onClick={()=>handleSubmit()} variant='contained' style={{float:'right'}} color='primary'>
-          Submit
+      <Button onClick={() => handleSubmit()} variant='contained' style={{ float: 'right' }} color='primary'>
+        Submit
       </Button>
-      
+
     </div>
   );
   return (
     <React.Fragment>
-        <Modal
+      <Modal
         open={open}
         onClose={handleClose}
         aria-labelledby="simple-modal-title"
@@ -423,38 +319,31 @@ export default function BottomAppBar() {
         </Typography>
         <Divider />
         <List className={classes.list}>
-          {messages.map(({ id, primary, secondary, person }) => (
-            <React.Fragment key={id}>
-              {id === 1 && <ListSubheader className={classes.subheader}>Latest added</ListSubheader>}
-              {id === 3 && <ListSubheader className={classes.subheader}>All books</ListSubheader>}
-              <ListItem button component={Link} to="/myLibrary" >
-                <ListItemAvatar>
-                  <Avatar alt="Profile Picture" src={person} />
-                </ListItemAvatar>
-                <ListItemText primary={primary} secondary={secondary} />
-              </ListItem>
-            </React.Fragment>
-          ))}
+          {allAddedBooks.map((book, id) => {
+            return (
+              <React.Fragment key={id}>
+                {id === 0 && <ListSubheader className={classes.subheader}>All books</ListSubheader>}
+                <ListItem button component={Link} to="/myLibrary" >
+                  <ListItemAvatar>
+                    <Avatar alt="Profile Picture" src={messages[0].person} />
+                  </ListItemAvatar>
+                  <ListItemText primary={book.name} secondary={book.description} />
+                </ListItem>
+              </React.Fragment>
+            )
+
+          })}
         </List>
       </Paper>
       <AppBar position="fixed" color="#fff" className={classes.appBar}>
         <Toolbar>
-          {/* <IconButton edge="start" color="inherit" aria-label="open drawer">
-            <MenuIcon />
-          </IconButton> */}
-          <Typography  variant="h5" gutterBottom>
-          My Library
+          <Typography variant="h5" gutterBottom>
+            My Library
         </Typography>
           <Fab color="secondary" onClick={handleOpen} aria-label="add" className={classes.fabButton}>
             <AddIcon />
           </Fab>
           <div className={classes.grow} />
-          {/* <IconButton color="inherit">
-            <SearchIcon />
-          </IconButton>
-          <IconButton edge="end" color="inherit">
-            <MoreIcon />
-          </IconButton> */}
         </Toolbar>
       </AppBar>
     </React.Fragment>

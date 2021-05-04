@@ -5,6 +5,8 @@ import Library from './components/Library/Library'
 import Forum from './components/Forum/Forum'
 import MyProfile from './components/MyProfile/MyProfile'
 import Swipe from './components/Swipe/Swipe'
+import Profile from './components/Profile/Profile'
+
 import Auth from './components/Auth/WecomeAuth'
 import fire from "./fire";
 import Spinner from './components/Utils/Spinner'
@@ -77,7 +79,8 @@ function App(props) {
             <Route exact path="/myLibrary" component={Library} />
             <Route exact path="/forum" component={Forum} />
             <Route exact path="/swipe" component={Swipe} />
-            <Route exact path="/myProfile" component={MyProfile} />
+            <Route exact path="/myProfile" component={Profile} />
+            {/* <Route exact path="/myProfile" component={MyProfile} /> */}
 
 
             {/* <Route
