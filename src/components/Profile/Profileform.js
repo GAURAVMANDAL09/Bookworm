@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import axios from 'axios'
+import axios from "axios";
 import {
   FormControl,
   FormControlLabel,
   FormLabel,
   Grid,
+  Icon,
   InputLabel,
   makeStyles,
   MenuItem,
@@ -18,7 +19,8 @@ import { useForm, Form } from "./useForm";
 import Inputgm from "./Inputgm";
 import Radiogrp from "./Radiogrp";
 import firebase from "firebase/app";
-import Button from '@material-ui/core/Button'
+import Button from "@material-ui/core/Button";
+
 // let initialFValues = {
 //   userId: 0,
 //   id: 0,
@@ -32,8 +34,6 @@ import Button from '@material-ui/core/Button'
 //   distance: "",
 // };
 
-
-
 const genderItems = [
   { id: "male", title: "Male" },
   { id: "female", title: "Female" },
@@ -42,36 +42,51 @@ const genderItems = [
 
 const Profileform = () => {
   // const { values, setValues, handleInputChange } = useForm(initialFValues);
-  const [fullname,setFullname] = useState('');
-  const [email,setEmail] = useState('');
-  const [nickname,setNickname] = useState('');
-  const [mobile,setMobile] = useState('');
-  const [city,setCity] = useState('');
-  const [gender,setGender] = useState('');
+  const [fullname, setFullname] = useState("");
+  const [email, setEmail] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [location, setLocation] = useState("");
+  const [gender, setGender] = useState("");
+
+  const [locdetails,setLocdetails] = useState(null);
+  const getUserGeoLocationDetails= () => {
+      fetch("https://geolocation-db.com/json/ef6c41a0-9d3c-11eb-8f3b-e1f5536499e7")
+      .then( response => response.json() )
+      .then( data => setLocdetails(data) );
+  }
 
   const handleSubmit = () => {
-
     let user = firebase.auth().currentUser;
     let userId = user.uid;
     // console.log(id, fullname, email, nickname, mobile, city,gender, birthday,dsitance);
-    console.log(fullname, email, nickname,mobile,gender);
+    console.log(fullname, email, nickname, mobile, gender,locdetails.latitude,locdetails.longitude,locdetails.city);
     const body = {
       user: {
         userId: userId,
         fullname: fullname,
         email: email,
         nickname: nickname,
-        mobile:mobile,
+        mobile: mobile,
         gender: gender,
         // location:,
         // tags:,
-        // 
-      }
-    }
-    axios.post('https://6h6nlvoxy8.execute-api.ap-south-1.amazonaws.com/Staging01' + `/user`,body)
-      .then(res => alert(res))
-      .catch(err => console.log(err))
-  }
+        //
+      },
+    };
+    axios
+      .post(
+        "https://6h6nlvoxy8.execute-api.ap-south-1.amazonaws.com/Staging01" +
+          `/user`,
+        body
+      )
+      .then((res) => alert(res))
+      .catch((err) => console.log(err));
+  };
+
+
+
+
 
   return (
     <Form>
@@ -105,14 +120,7 @@ const Profileform = () => {
             value={mobile}
             onChange={(event) => setMobile(event.target.value)}
           />
-          
-          <Inputgm
-            label="City"
-            name="city"
-            value={city}
-            onChange={(event) => setCity(event.target.value)}
-          />
-
+  
           <Radiogrp
             row
             name="gender"
@@ -121,7 +129,19 @@ const Profileform = () => {
             onChange={(event) => setGender(event.target.value)}
             items={genderItems}
           ></Radiogrp>
-          <FormControl variant="outlined" >
+
+          <Button
+            variant="contained"
+            color="primary"
+            className={"kuch bhi"}
+            endIcon={<Icon></Icon>}
+            onClick = {getUserGeoLocationDetails}
+          >
+            Location
+          </Button>
+         
+
+          <FormControl variant="outlined">
             <InputLabel id="demo-simple-select-outlined-label">City</InputLabel>
             <Select
               labelId="demo-simple-select-outlined-label"
@@ -143,22 +163,27 @@ const Profileform = () => {
           </FormControl>
 
           <Slider
-      defaultValue={50}
-      step={64}
-      graduated
-      progress
-      min={64}
-      max={1024}
-      renderMark={mark => {
-        if ([64, 128, 256, 512, 1024].includes(mark)) {
-          return <span>{mark} GB</span>;
-        }
-        return null;
-      }}
-    />
-    <Button onClick={() => handleSubmit()} variant='contained' style={{ float: 'right' }} color='primary'>
-        Submit
-      </Button>
+            defaultValue={50}
+            step={64}
+            graduated
+            progress
+            min={64}
+            max={1024}
+            renderMark={(mark) => {
+              if ([64, 128, 256, 512, 1024].includes(mark)) {
+                return <span>{mark} GB</span>;
+              }
+              return null;
+            }}
+          />
+          <Button
+            onClick={() => handleSubmit()}
+            variant="contained"
+            style={{ float: "right" }}
+            color="primary"
+          >
+            Submit
+          </Button>
         </Grid>
         <Grid items xs={6}></Grid>
       </Grid>
