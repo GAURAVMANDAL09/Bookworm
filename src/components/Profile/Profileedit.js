@@ -40,27 +40,39 @@ const genderItems = [
   { id: "other", title: "Other" },
 ];
 
-const Profileform = () => {
+const Profileedit = (props) => {
   // const { values, setValues, handleInputChange } = useForm(initialFValues);
-  const [fullname, setFullname] = useState("");
-  const [email, setEmail] = useState("");
-  const [nickname, setNickname] = useState("");
-  const [mobile, setMobile] = useState("");
-  const [location, setLocation] = useState("");
-  const [gender, setGender] = useState("");
+  const [fullname, setFullname] = useState(props.details.fullname);
+  const [email, setEmail] = useState(props.details.email);
+  const [nickname, setNickname] = useState(props.details.nickname);
+  const [mobile, setMobile] = useState(props.details.mobile);
+  const [location, setLocation] = useState(props.details.location);
+  const [gender, setGender] = useState(props.details.gender);
 
-  const [locdetails,setLocdetails] = useState(null);
-  const getUserGeoLocationDetails= () => {
-      fetch("https://geolocation-db.com/json/ef6c41a0-9d3c-11eb-8f3b-e1f5536499e7")
-      .then( response => response.json() )
-      .then( data => setLocdetails(data) );
+  const [locdetails, setLocdetails] = useState(null);
+  useEffect(() => {
+    alert("sd");
+  }, []);
+  const getUserGeoLocationDetails = () => {
+    fetch(
+      "https://geolocation-db.com/json/ef6c41a0-9d3c-11eb-8f3b-e1f5536499e7"
+    )
+      .then((response) => response.json())
+      .then((data) => setLocdetails(data));
   };
 
   const handleSubmit = () => {
     let user = firebase.auth().currentUser;
     let userId = user.uid;
     // console.log(id, fullname, email, nickname, mobile, city,gender, birthday,dsitance);
-    console.log(fullname, email, nickname, mobile, gender,locdetails.latitude,locdetails.longitude,locdetails.city);
+    console.log(
+      fullname,
+      email,
+      nickname,
+      mobile,
+      gender,
+      slidix,
+    );
     const body = {
       user: {
         userId: userId,
@@ -69,13 +81,12 @@ const Profileform = () => {
         nickname: nickname,
         mobile: mobile,
         gender: gender,
+        distance:slidix
         // location:,
         // tags:,
         //
       },
     };
-
-    
 
     axios
       .post(
@@ -86,6 +97,7 @@ const Profileform = () => {
       .then((res) => alert(res))
       .catch((err) => console.log(err));
   };
+
   const [slidix, setSlidix] = useState(5);
   const changeSlidix = (event, value) => {
     setSlidix(value);
@@ -122,9 +134,6 @@ const Profileform = () => {
 ] 
   const getText = (value) => `${value}`
 
-
-
-
   return (
     <Form>
       <Grid container>
@@ -157,7 +166,7 @@ const Profileform = () => {
             value={mobile}
             onChange={(event) => setMobile(event.target.value)}
           />
-  
+
           <Radiogrp
             row
             name="gender"
@@ -172,11 +181,10 @@ const Profileform = () => {
             color="primary"
             className={"kuch bhi"}
             endIcon={<Icon></Icon>}
-            onClick = {getUserGeoLocationDetails}
+            onClick={getUserGeoLocationDetails}
           >
             Location
           </Button>
-         
 
           <FormControl variant="outlined">
             <InputLabel id="demo-simple-select-outlined-label">City</InputLabel>
@@ -226,4 +234,4 @@ const Profileform = () => {
   );
 };
 
-export default Profileform;
+export default Profileedit;

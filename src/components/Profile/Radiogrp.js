@@ -13,17 +13,17 @@ export default function Radiogrp(props) {
       onChange={onChange}
       >   
       <FormControlLabel
-        value="male"
+        value="Male"
         control={<Radio />}
         label="Male"
         ></FormControlLabel>
       <FormControlLabel
-        value="female"
+        value="Female"
         control={<Radio />}
         label="Female"
         ></FormControlLabel>
       <FormControlLabel
-        value="other"
+        value="Other"
         control={<Radio />}
         label="Other"
         ></FormControlLabel>
