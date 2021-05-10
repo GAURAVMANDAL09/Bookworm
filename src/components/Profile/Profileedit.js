@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import './profile.css'
 import {
   FormControl,
   FormControlLabel,
@@ -51,7 +52,7 @@ const Profileedit = (props) => {
 
   const [locdetails, setLocdetails] = useState(null);
   useEffect(() => {
-    alert("sd");
+    // alert("sd");
   }, []);
   const getUserGeoLocationDetails = () => {
     fetch(
@@ -81,7 +82,8 @@ const Profileedit = (props) => {
         nickname: nickname,
         mobile: mobile,
         gender: gender,
-        distance:slidix
+        distance:slidix,
+        // img: imgprev,
         // location:,
         // tags:,
         //
@@ -134,9 +136,68 @@ const Profileedit = (props) => {
 ] 
   const getText = (value) => `${value}`
 
+  const [imgprev,setImgprev] = useState(null);
+  const [imgerror,setImgerror] = useState(false);
+  const handleImageChange = (e) => {
+    
+    const selected = e.target.files[0];
+    const Allowed_Types =[ "image/png" , "image/jpeg", "image/jpg" ];
+    if(selected && Allowed_Types.includes(selected.type)) {
+      let reader = new FileReader();
+      reader.onloadend = () => {
+          setImgprev(reader.result);
+          setImgerror(false);
+      }
+      reader.readAsDataURL(selected);
+    } else {
+      setImgerror(true);
+      
+    }
+  }
+
+
   return (
     <Form>
       <Grid container>
+      <Grid items xs={4}>
+        <div className = "Picmerror">
+          {imgerror && <p className = "imgerrormsg">File Format Unsupported</p>}
+        </div>
+        <div className="userxpic">
+          <div className="imgPreview"
+            style = {{background : imgprev ? `url("${imgprev}") no-repeat center/cover`: "#131313"}}
+          >
+            {!imgprev && (
+            <>
+              <p  style={{color: "white"}}>Update Profile Picture</p>
+              <label htmlFor="fileUpload" className="customFileUpload"> Choose Upload</label>
+              <span  style={{color: "grey"}}>( jpg, jpeg, png )</span>
+            </>)}
+        <input style= {{ display:"none" }}type = "file" id = "fileUpload" onChange= {handleImageChange} />
+        
+          </div>
+          </div>
+          <div className = "Picchange">
+          
+          {imgprev && (
+                  <Button
+                  onClick={() => setImgprev(null)}
+                  variant="contained"
+                  style={{ float: "right" }}
+                  color="primary"
+                >
+                Change Profile Picture
+                </Button>
+                  )}
+
+                {/* {imgprev && (
+                  <button styles = {{height: "5"}} onClick={() => setImgprev(null)}>Change Profile Picture</button>
+                  )} */}
+           </div>
+
+        </Grid>
+
+
         <Grid items xs={3}>
           <Inputgm
             label="Full Name"
@@ -207,7 +268,7 @@ const Profileedit = (props) => {
             </Select>
           </FormControl>
 
-          <Slider style={{ width: 900, marginTop: 35, marginLeft: 15 }} 
+          <Slider style={{ width: 850, marginTop: 35, marginLeft: 15 }} 
           min = {0}
           max={100}
           default value = {20}
@@ -228,7 +289,7 @@ const Profileedit = (props) => {
             Submit
           </Button>
         </Grid>
-        <Grid items xs={6}></Grid>
+        
       </Grid>
     </Form>
   );

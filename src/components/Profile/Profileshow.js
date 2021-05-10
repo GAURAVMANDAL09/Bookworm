@@ -66,9 +66,46 @@ const Profileshow = (props) => {
         props.changeFunc('EDIT');
   };
 
+  const [imgprev,setImgprev] = useState(null);
+  const [imgerror,setImgerror] = useState(false);
+
   return (
     <Form>
       <Grid container>
+      <Grid items xs={4}>
+        <div className = "Picmerror">
+          {imgerror && <p className = "imgerrormsg">File Format Unsupported</p>}
+        </div>
+        <div className="userxpic">
+          <div className="imgPreview"
+            style = {{background : imgprev ? `url("${imgprev}") no-repeat center/cover`: "#131313"}}
+          >
+            {!imgprev && (
+            <>
+              <p  style={{color: "white"}}>Update Profile Picture</p>
+              <label htmlFor="fileUpload" className="customFileUpload"> Choose Upload</label>
+              <span  style={{color: "grey"}}>( jpg, jpeg, png )</span>
+            </>)}
+        {/* <input style= {{ display:"none" }}type = "file" id = "fileUpload" onChange= {handleImageChange} /> */}
+        
+          </div>
+          </div>
+          <div className = "Picchange">
+          {imgprev && (
+                  <Button
+                  onClick={() => setImgprev(null)}
+                  variant="contained"
+                  style={{ float: "right" }}
+                  color="primary"
+                >
+                Change Profile Picture
+                </Button>
+                  )}
+           </div>
+
+        </Grid>
+
+
         <Grid items xs={3}>
           <Inputgm
             label="Full Name"
@@ -113,7 +150,7 @@ const Profileshow = (props) => {
           />
 
 
-          <FormControl variant="outlined">
+          {/* <FormControl variant="outlined">
             <InputLabel id="demo-simple-select-outlined-label">City</InputLabel>
             <Select
               labelId="demo-simple-select-outlined-label"
@@ -132,22 +169,9 @@ const Profileshow = (props) => {
               <MenuItem value={30}>Asansol</MenuItem>
               <MenuItem value={30}>Lucky Sarai Jn</MenuItem>
             </Select>
-          </FormControl>
+          </FormControl> */}
 
-          <Slider
-            defaultValue={50}
-            step={64}
-            graduated
-            progress
-            min={64}
-            max={1024}
-            renderMark={(mark) => {
-              if ([64, 128, 256, 512, 1024].includes(mark)) {
-                return <span>{mark} GB</span>;
-              }
-              return null;
-            }}
-          />
+        
           <Button
             onClick={() => handleSubmit()}
             variant="contained"
@@ -157,7 +181,7 @@ const Profileshow = (props) => {
             Edit
           </Button>
         </Grid>
-        <Grid items xs={6}></Grid>
+        
       </Grid>
     </Form>
   );

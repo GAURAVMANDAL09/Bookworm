@@ -97,7 +97,20 @@ const useStyles = makeStyles((theme) => ({
     //   overflow:'scroll',
   },
   paper: {
-    paddingBottom: 50,
+
+    top: '20%',
+
+    left: '10%',
+    right: '10%',
+    width: '80%',
+
+    display: 'block',
+    position: 'absolute',
+    //  // width: 400,
+    backgroundColor: theme.palette.background.paper,
+
+    padding: theme.spacing(2, 4, 3),
+
   },
   list: {
     marginBottom: theme.spacing(2),
