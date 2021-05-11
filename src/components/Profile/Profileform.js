@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import "./profile.css";
+import constants from "../../constants";
+import Select from "react-select";
 import {
   FormControl,
   FormControlLabel,
@@ -11,7 +14,6 @@ import {
   MenuItem,
   Radio,
   RadioGroup,
-  Select,
   Slider,
   TextField,
 } from "@material-ui/core";
@@ -21,46 +23,72 @@ import Radiogrp from "./Radiogrp";
 import firebase from "firebase/app";
 import Button from "@material-ui/core/Button";
 
-// let initialFValues = {
-//   userId: 0,
-//   id: 0,
-//   fullname: "",
-//   email: "",
-//   nickname: "",
-//   mobile: "",
-//   city: "",
-//   gender: "male",
-//   birthday: "",
-//   distance: "",
-// };
-
+const allTags = constants.allTags;
 const genderItems = [
   { id: "male", title: "Male" },
   { id: "female", title: "Female" },
   { id: "other", title: "Other" },
 ];
 
-const Profileform = () => {
+const Profileform = (props) => {
   // const { values, setValues, handleInputChange } = useForm(initialFValues);
-  const [fullname, setFullname] = useState("");
-  const [email, setEmail] = useState("");
-  const [nickname, setNickname] = useState("");
-  const [mobile, setMobile] = useState("");
-  const [location, setLocation] = useState("");
-  const [gender, setGender] = useState("");
+  const [fullname, setFullname] = useState('');
+  const [email, setEmail] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [mobile, setMobile] = useState('');
+  const [location, setLocation] = useState('');
+  const [gender, setGender] = useState('');
+  const [lat, setLat] = useState(null);
+  const [long, setLong] = useState(null);
+  const [imgprev, setImgprev] = useState("");
+  const [tmpimgprev, setTmpimgprev] = useState(null);
+  const [imgerror, setImgerror] = useState(false);
+  const [chosenTags, setChosenTags] = useState([]);
 
-  const [locdetails,setLocdetails] = useState(null);
-  const getUserGeoLocationDetails= () => {
-      fetch("https://geolocation-db.com/json/ef6c41a0-9d3c-11eb-8f3b-e1f5536499e7")
-      .then( response => response.json() )
-      .then( data => setLocdetails(data) );
+  useEffect(() => {
+   
+  }, []);
+  
+  function showPosition(position) {
+    setLat(position.coords.latitude);
+    setLong(position.coords.longitude);
+  }
+
+  const getUserGeoLocationDetails = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(showPosition);
+    } else {
+      alert("Please enable locationa access");
+    }
+    // fetch(
+    //   "https://geolocation-db.com/json/ef6c41a0-9d3c-11eb-8f3b-e1f5536499e7"
+    // )
+    //   .then((response) => response.json())
+    //   .then((data) => setLocdetails(data));
   };
-
-  const handleSubmit = () => {
+  const selectStyles = {
+    menu: (base) => ({
+      ...base,
+      zIndex: 100,
+    }),
+  };
+  const handleSubmitUtil = (imgLink) => {
+    let tagsArray = chosenTags.map(tag => tag.value);
     let user = firebase.auth().currentUser;
     let userId = user.uid;
     // console.log(id, fullname, email, nickname, mobile, city,gender, birthday,dsitance);
-    console.log(fullname, email, nickname, mobile, gender,locdetails.latitude,locdetails.longitude,locdetails.city);
+    console.log(
+      fullname,
+      email,
+      nickname,
+      mobile,
+      gender,
+      slidix,
+      lat,
+      long,
+      imgLink,
+      tagsArray,
+    );
     const body = {
       user: {
         userId: userId,
@@ -69,13 +97,15 @@ const Profileform = () => {
         nickname: nickname,
         mobile: mobile,
         gender: gender,
-        // location:,
-        // tags:,
-        //
+        distance: slidix,
+        tags: tagsArray,
+        // img: imgprev,
+        lat: lat,
+        long: long,
+        imgLink,
+       
       },
     };
-
-    
 
     axios
       .post(
@@ -83,51 +113,158 @@ const Profileform = () => {
           `/user`,
         body
       )
-      .then((res) => alert(res))
+      .then((res) => window.location.reload())
       .catch((err) => console.log(err));
   };
+
+  
+  const handleSubmit = () => {
+    if(lat==null || long==null){
+      alert("Please Enable Location Access");
+      return;
+    }
+    if (!tmpimgprev) {
+      handleSubmitUtil(imgprev);
+      return;
+    }
+
+    var ext = tmpimgprev.name.split(".").pop();
+    const metaData = {
+      contentType: tmpimgprev.type,
+    };
+    const payload = {
+      contentType: tmpimgprev.type,
+      metaData: metaData,
+    };
+
+    
+
+    axios
+      .post(
+        "https://6h6nlvoxy8.execute-api.ap-south-1.amazonaws.com/Staging01/test-lambda",
+        payload
+      )
+      .then((initiateResult) => {
+        var imgLink = `https://bookworm01.s3.ap-south-1.amazonaws.com/${initiateResult.data.Key}`;
+        axios
+          .put(initiateResult.data.uploadURL, tmpimgprev, {
+            headers: {
+              "Content-Type": "image/png",
+            },
+          })
+          .then((res) => {
+            handleSubmitUtil(imgLink);
+          })
+          .catch((err) => console.log(err));
+      })
+      .catch((err) => console.log(err));
+  };
+
   const [slidix, setSlidix] = useState(5);
   const changeSlidix = (event, value) => {
     setSlidix(value);
   };
   const customMarks = [
-  {
-    value : 5,
-    label : '5 km'
-  },
-  {
-    value : 12,
-    label : '12 km'
-  },
-  {
-    value : 20,
-    label : '20 km'
-  },
-  {
-    value : 30,
-    label : '30 km'
-  },
-  {
-    value : 50,
-    label : '50 km'
-  },
-  {
-    value : 75,
-    label : '75 km'
-  },
-  {
-    value : 100,
-    label : '100 km'
-  },
-] 
-  const getText = (value) => `${value}`
+    {
+      value: 5,
+      label: "5 km",
+    },
+    {
+      value: 12,
+      label: "12 km",
+    },
+    {
+      value: 20,
+      label: "20 km",
+    },
+    {
+      value: 30,
+      label: "30 km",
+    },
+    {
+      value: 50,
+      label: "50 km",
+    },
+    {
+      value: 75,
+      label: "75 km",
+    },
+    {
+      value: 100,
+      label: "100 km",
+    },
+  ];
+  const getText = (value) => `${value}`;
 
+  const onTagsChange = (event) => {
+    setChosenTags(event);
+  };
 
+  const handleImageChange = (e) => {
+    setTmpimgprev(e.target.files[0]);
 
+    const selected = e.target.files[0];
+    const Allowed_Types = ["image/png", "image/jpeg", "image/jpg"];
+    if (selected && Allowed_Types.includes(selected.type)) {
+      let reader = new FileReader();
+      reader.onloadend = () => {
+        setImgprev(reader.result);
+        setImgerror(false);
+      };
+      reader.readAsDataURL(selected);
+    } else {
+      setImgerror(true);
+    }
+  };
 
   return (
     <Form>
       <Grid container>
+        <Grid items xs={4}>
+          <div className="Picmerror">
+            {imgerror && <p className="imgerrormsg">File Format Unsupported</p>}
+          </div>
+          <div className="userxpic">
+            <div
+              className="imgPreview"
+              style={{
+                background: imgprev
+                  ? `url("${imgprev}") no-repeat center/cover`
+                  : "#131313",
+              }}
+            >
+              {!imgprev && (
+                <>
+                  <p style={{ color: "white" }}>Update Profile Picture</p>
+                  <label htmlFor="fileUpload" className="customFileUpload">
+                    {" "}
+                    Choose Upload
+                  </label>
+                  <span style={{ color: "grey" }}>( jpg, jpeg, png )</span>
+                </>
+              )}
+              <input
+                style={{ display: "none" }}
+                type="file"
+                id="fileUpload"
+                onChange={handleImageChange}
+              />
+            </div>
+          </div>
+          <div className="Picchange">
+            {imgprev && (
+              <Button
+                onClick={() => setImgprev(null)}
+                variant="contained"
+                style={{ float: "right" }}
+                color="primary"
+              >
+                Change Profile Picture
+              </Button>
+            )}
+          </div>
+        </Grid>
+
         <Grid items xs={3}>
           <Inputgm
             label="Full Name"
@@ -157,7 +294,22 @@ const Profileform = () => {
             value={mobile}
             onChange={(event) => setMobile(event.target.value)}
           />
-  
+
+<Grid style={{paddingTop : 20, paddingBottom : 20}} item xs={12}>
+            <Select
+              isMulti
+              styles={selectStyles}
+              name="Features"
+              value={chosenTags}
+              options={allTags}
+              placeholder="Preference (Select Multiple)"
+              className="basic-multi-select"
+              onChange={(event) => onTagsChange(event)}
+              classNamePrefix="select"
+            />
+          </Grid>
+
+
           <Radiogrp
             row
             name="gender"
@@ -168,49 +320,36 @@ const Profileform = () => {
           ></Radiogrp>
 
           <Button
+            required
             variant="contained"
             color="primary"
+            style={{ margin: ".5rem", width: "10rem" }}
             className={"kuch bhi"}
             endIcon={<Icon></Icon>}
-            onClick = {getUserGeoLocationDetails}
+            onClick={getUserGeoLocationDetails}
           >
             Location
           </Button>
-         
-
-          <FormControl variant="outlined">
-            <InputLabel id="demo-simple-select-outlined-label">City</InputLabel>
-            <Select
-              labelId="demo-simple-select-outlined-label"
-              id="demo-simple-select-outlined"
-              value="city"
-              onChange="onChange"
-              label="Age"
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value={10}>Agra</MenuItem>
-              <MenuItem value={20}>Patna</MenuItem>
-              <MenuItem value={30}>Begusarai</MenuItem>
-              <MenuItem value={30}>Sikhoabad</MenuItem>
-              <MenuItem value={30}>Asansol</MenuItem>
-              <MenuItem value={30}>Lucky Sarai Jn</MenuItem>
-            </Select>
-          </FormControl>
-
-          <Slider style={{ width: 900, marginTop: 35, marginLeft: 15 }} 
-          min = {0}
-          max={100}
-          default value = {20}
-          value= {slidix}
-          // step = {null}
-          track = {false}
-          marks= {customMarks}
-          onChange = {changeSlidix}
-          getAriaValueText ={getText}
-          valueLabelDisplay = 'auto'
+          <div className="DDis" style={{ paddingTop: 20, marginLeft: 10 }}>
+            <span>Distance Discovery</span>
+          </div>
+          {/* <p style={{margin : 20, marginRight: 9, fontWeight: 15, fontSize: 15}}>Distance Discovery</p> */}
+          <Slider
+            style={{ width: 800, marginTop: 10, marginLeft: 15 }}
+            min={0}
+            max={100}
+            default
+            value={20}
+            value={slidix}
+            // step = {null}
+            track={false}
+            marks={customMarks}
+            onChange={changeSlidix}
+            getAriaValueText={getText}
+            valueLabelDisplay="auto"
           />
+
+        
           <Button
             onClick={() => handleSubmit()}
             variant="contained"
@@ -220,7 +359,6 @@ const Profileform = () => {
             Submit
           </Button>
         </Grid>
-        <Grid items xs={6}></Grid>
       </Grid>
     </Form>
   );

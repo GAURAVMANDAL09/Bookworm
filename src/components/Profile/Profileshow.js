@@ -11,15 +11,16 @@ import {
   MenuItem,
   Radio,
   RadioGroup,
-  Select,
   Slider,
   TextField,
 } from "@material-ui/core";
+import Select from 'react-select'
 import { useForm, Form } from "./useForm";
 import Inputgm from "./Inputgm";
 import Radiogrp from "./Radiogrp";
 import firebase from "firebase/app";
 import Button from "@material-ui/core/Button";
+import constants from "../../constants"
 
 // let initialFValues = {
 //   userId: 0,
@@ -39,6 +40,13 @@ const genderItems = [
   { id: "Female", title: "Female" },
   { id: "other", title: "Other" },
 ];
+const allTags = constants.allTags;
+const selectStyles = {
+  menu: (base) => ({
+    ...base,
+    zIndex: 100,
+  }),
+};
 
 const Profileshow = (props) => {
   // const { values, setValues, handleInputChange } = useForm(initialFValues);
@@ -48,11 +56,26 @@ const Profileshow = (props) => {
   const [mobile, setMobile] = useState(props.details.mobile);
   const [location, setLocation] = useState(props.details.location);
   const [gender, setGender] = useState(props.details.gender);
+  const [imgprev,setImgprev] = useState(props.details.imgLink);
+  const [tags,setTags] = useState([]);
 
   const [locdetails, setLocdetails] = useState(null);
   useEffect(() => {
-    console.log(props);
+    var tmparray = [];
+    if(!props.details || !props.details.tags)
+    return;
+    for(var i=0;i<props.details.tags.length;i++){
+      tmparray.push(getKeyValuePair(props.details.tags[i]))
+    }
+    setTags(tmparray);
   }, []);
+  const getKeyValuePair = (name) => {
+    for(var i=0;i<allTags.length;i++){
+      if(allTags[i].value===name){
+        return allTags[i];
+      }
+    }
+  }
   const getUserGeoLocationDetails = () => {
     fetch(
       "https://geolocation-db.com/json/ef6c41a0-9d3c-11eb-8f3b-e1f5536499e7"
@@ -66,7 +89,7 @@ const Profileshow = (props) => {
         props.changeFunc('EDIT');
   };
 
-  const [imgprev,setImgprev] = useState(null);
+  
   const [imgerror,setImgerror] = useState(false);
 
   return (
@@ -90,18 +113,7 @@ const Profileshow = (props) => {
         
           </div>
           </div>
-          <div className = "Picchange">
-          {imgprev && (
-                  <Button
-                  onClick={() => setImgprev(null)}
-                  variant="contained"
-                  style={{ float: "right" }}
-                  color="primary"
-                >
-                Change Profile Picture
-                </Button>
-                  )}
-           </div>
+
 
         </Grid>
 
@@ -150,33 +162,26 @@ const Profileshow = (props) => {
           />
 
 
-          {/* <FormControl variant="outlined">
-            <InputLabel id="demo-simple-select-outlined-label">City</InputLabel>
+<Grid style={{paddingTop : 20, paddingBottom : 20}} item xs={12}>
             <Select
-              labelId="demo-simple-select-outlined-label"
-              id="demo-simple-select-outlined"
-              value="city"
-              onChange="onChange"
-              label="Age"
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value={10}>Agra</MenuItem>
-              <MenuItem value={20}>Patna</MenuItem>
-              <MenuItem value={30}>Begusarai</MenuItem>
-              <MenuItem value={30}>Sikhoabad</MenuItem>
-              <MenuItem value={30}>Asansol</MenuItem>
-              <MenuItem value={30}>Lucky Sarai Jn</MenuItem>
-            </Select>
-          </FormControl> */}
+              isMulti
+              styles={selectStyles}
+              name="Features"
+              value={tags}
+              options={allTags}
+              placeholder="Preference (Select Multiple)"
+              className="basic-multi-select"
+              disabled={true}
+              classNamePrefix="select"
+            />
+          </Grid>
 
         
           <Button
             onClick={() => handleSubmit()}
             variant="contained"
             style={{ float: "right" }}
-            color="primary"
+            color="default"
           >
             Edit
           </Button>

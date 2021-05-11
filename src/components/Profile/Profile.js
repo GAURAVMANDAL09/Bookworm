@@ -53,7 +53,7 @@ const Profile = () => {
     </div>
   );
   if(page==='EDIT'){
-     return( <Profileedit details={data} />)
+     return( <Profileedit details={data}  />)
   }
 
   return(

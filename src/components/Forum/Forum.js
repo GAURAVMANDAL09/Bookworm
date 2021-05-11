@@ -1,6 +1,9 @@
+import React from 'react'
+import Gmessenger from  '../Messenger/Gmessenger'
 const Forum = () => {
     return (
-        <h1>Forum Coming Soon...</h1>
+        <Gmessenger/>
     )
 }
+
 export default Forum

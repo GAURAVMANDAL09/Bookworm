@@ -8,8 +8,7 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import { Link } from "react-router-dom";
 import fire from '../../fire'
-
-import './Navigation.css'
+import './navigation.css'
 
 import clsx from 'clsx';
 import Drawer from '@material-ui/core/Drawer';
@@ -95,7 +94,8 @@ export default function ButtonAppBar() {
     </div>
   );
   return (
-    <div className={classes.root}>
+    <div className="gmnav" >
+
         <Drawer anchor='left' open={state['left']} onClose={toggleDrawer('left', false)}>
             {list('left')}
           </Drawer>

@@ -3,7 +3,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import Navigation from './components/Navigation/Navigation'
 import Library from './components/Library/Library'
 import Forum from './components/Forum/Forum'
-import MyProfile from './components/MyProfile/MyProfile'
 import Swipe from './components/Swipe/Swipe'
 import Profile from './components/Profile/Profile'
 
