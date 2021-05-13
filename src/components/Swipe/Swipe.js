@@ -1,20 +1,24 @@
-import SwipeCard from './SwipeCard';
-import SwipeButtons from './SwipeButtons';
+import React from 'react'
+import styled from 'styled-components';
+import Gmain from './Gmain';
+import Mainsxn  from "./Mainsxn";
+import { Gmcard } from "./Gmcard";
 
-var prop ={
-    "name": "(Book Title)",
-    "author": "(Author name)",
-    "img": "https://www.asme.org/getmedia/c2c8ea5a-b690-4ba7-92bb-34bd1432862b/book_guide_hero_books.png?width=300&height=315&ext=.png",
-    "distance": "(distance)",
-    "description": "(Book description)"
-  };
+  const AppContainer = styled.div`
+    width: 100%;
+    height:100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    display: flex;
+    aligh-items: center;
+    justify-content: center;
+  `;
 
 const Swipe = () => {
-    return (
-        <div>
-            <SwipeCard props={prop} />
-            <SwipeButtons />
-        </div>
+  return (
+           <Mainsxn />
+
+        //  <Gmcard/>
     );
 }
 export default Swipe;

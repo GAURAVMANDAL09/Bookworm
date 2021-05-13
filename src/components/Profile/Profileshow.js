@@ -168,7 +168,7 @@ const Profileshow = (props) => {
               styles={selectStyles}
               name="Features"
               value={tags}
-              options={allTags}
+              //options={allTags}
               placeholder="Preference (Select Multiple)"
               className="basic-multi-select"
               disabled={true}

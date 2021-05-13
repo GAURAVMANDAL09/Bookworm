@@ -66,6 +66,7 @@ function App(props) {
 
 
   return (
+    
     <div className={classes.root}>
       
         <Navigation />
@@ -80,7 +81,6 @@ function App(props) {
             <Route exact path="/swipe" component={Swipe} />
             <Route exact path="/myProfile" component={Profile} />
             {/* <Route exact path="/myProfile" component={MyProfile} /> */}
-
 
             {/* <Route
               path="/orderSuccess/:id"
