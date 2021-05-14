@@ -1,10 +1,12 @@
-import React from "react";
+import React,{useEffect} from "react";
 import "./Mainsxn.css";
+import firebase from "firebase/app";
 import { Stack } from "./Stack";
 import styled from "styled-components";
+import axios from 'axios'
 // import { Gmcard } from "./Gmcard";
 
-import BookImg from "../Swipe/boo/image.png";
+import BookImg from "../Swipe/boo/1.jpg";
 // import { Bookdetails } from "./Bookdetails";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { useState } from "react";
@@ -107,6 +109,8 @@ export default function App(props) {
   const y = useMotionValue(0);
   const rotateX = useTransform(y, [-100, 100], [30, -30]);
   const rotateY = useTransform(x, [-100, 100], [-30, 30]);
+  const [cnt,setCnt] = useState(-1);
+  const [tmp,setTmp] = useState(false);
 
   //   width: 200px;
   //   height: 250px;
@@ -176,8 +180,101 @@ export default function App(props) {
     align-items: center;
   `;
   //XXXXXXXXXXXXXXX Hooks XXXXXXXXXXXXXXXXXXXXXXXXXXXX
-  const [people, setPeople] = useState([
-    {
+  const [people, setPeople] = useState([]);
+  useEffect(()=>{
+    let user = firebase.auth().currentUser;
+    let userId = user.uid;
+    axios.get(`https://6h6nlvoxy8.execute-api.ap-south-1.amazonaws.com/Staging01/get-recommended-books?userId=${userId}&recommendationType=top-books`)
+    .then(res=> {
+      console.log(res.data)
+      setPeople(res.data['top-books'])
+    })
+  },[])
+  
+  const sendKey = (item,response) => {
+    if(response){
+      var key = item.key;
+      key = key.substring(1);
+      key = parseInt(key);
+      if(key==0){
+        setTmp(true);
+      }
+      console.log(people[key]);
+    }
+  }
+  return (
+    <div className="Mainsxn">
+      {tmp ? <h1>NO BOOKS </h1>
+      :
+      <Wrapper
+        onVote={(item, vote) => {
+          // setCnt(cnt+1);
+          sendKey(item,vote);    
+          
+          console.log(item, vote);
+        }}
+        style={{ x, y, rotateX, rotateY, z: 100, background: "#fff" }}
+        drag
+        dragElastic={0.16}
+        dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
+        whileTap={{ cursor: "grabbing" }}
+      >
+        {/* <Genre style={{ rotate: "-0deg", paddingBottom: "8.75em",   color: "white" }}>{niche}</Genre> */}
+
+        {people.map(person => {
+          return (
+            <Item
+            data-value="waffles"
+            whileTap={{ scale: 1.15 }}
+            style={{ x, y, rotateX, rotateY, rotate: "0deg", z: 100000 }}
+            drag
+            dragElastic={0.12}
+          >
+            <TopContainer>
+              <BookWrapper>
+                <Book
+                  style={{ x, y, rotateX, rotateY, rotate: "0deg", z: 100000 }}
+                  //   drag
+                  dragElastic={0.12}
+                  whileTap={{ cursor: "grabbing" }}
+                >
+                  {/* <div style = {{backgroundImage: 'img'}}></div> */}
+                  <img src={person.img || BookImg} />
+                </Book>
+              </BookWrapper>
+            </TopContainer>
+  
+            {/*  🥞🍩 */}
+            <BottomContainer>
+              <DetailsContainer>
+                <SmalText style={{ color: "#ff17a3" }}>
+                  {person.distance} KM Far
+                </SmalText>
+                <SpacedHorizontalContainer>
+                  <MediumText style={{ color: "orange" }}>{person.title}</MediumText>
+                </SpacedHorizontalContainer>
+                <SmalText style={{ color: "white" }}>{person.author}</SmalText>
+                <UltraSmall style={{ color: "#d6d6d6" }}>
+                  Description - '{person.description}'
+                </UltraSmall>
+              </DetailsContainer>
+              {/* <Bookdetails /> */}
+            </BottomContainer>
+          </Item>
+          )
+        })   } 
+        
+ 
+      </Wrapper>
+}
+    </div>
+  );
+}
+
+
+
+
+/**{
       title: "Harry Potter Deathly Hallows",
       author: "JK Rowling",
       img: "",
@@ -218,74 +315,4 @@ export default function App(props) {
 
       distance: "87",
       description: "blah blah hla jiol lasl asdad",
-    },
-  ]);
-  const [title, setTitle] = useState("Charlie and The Chocholate Factory");
-  const [author, setAuthor] = useState("Gaurav Mandal");
-  const [distance, setDistance] = useState("50");
-  const [niche, setNiche] = useState("Autobiography");
-  const [description, setDescription] = useState(
-    "this is a very good book best in the world, gaurav mandal is good boy. he loves to make videos, he loves to rap."
-  );
-  const [image, setImage] = useState("");
-
-  return (
-    <div className="Mainsxn">
-      <Wrapper
-        onVote={(item, vote) => console.log(item.props, vote)}
-        style={{ x, y, rotateX, rotateY, z: 100, background: "#000" }}
-        drag
-        dragElastic={0.16}
-        dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
-        whileTap={{ cursor: "grabbing" }}
-      >
-        {/* <Genre style={{ rotate: "-0deg", paddingBottom: "8.75em",   color: "white" }}>{niche}</Genre> */}
-
-        {people.map(person => {
-          return (
-            <Item
-            data-value="waffles"
-            whileTap={{ scale: 1.15 }}
-            style={{ x, y, rotateX, rotateY, rotate: "0deg", z: 100000 }}
-            drag
-            dragElastic={0.12}
-          >
-            <TopContainer>
-              <BookWrapper>
-                <Book
-                  style={{ x, y, rotateX, rotateY, rotate: "0deg", z: 100000 }}
-                  //   drag
-                  dragElastic={0.12}
-                  whileTap={{ cursor: "grabbing" }}
-                >
-                  {/* <div style = {{backgroundImage: 'img'}}></div> */}
-                  <img src={BookImg} />
-                </Book>
-              </BookWrapper>
-            </TopContainer>
-  
-            {/*  🥞🍩 */}
-            <BottomContainer>
-              <DetailsContainer>
-                <SmalText style={{ color: "#ff17a3" }}>
-                  {person.distance} KM Far
-                </SmalText>
-                <SpacedHorizontalContainer>
-                  <MediumText style={{ color: "orange" }}>{person.title}</MediumText>
-                </SpacedHorizontalContainer>
-                <SmalText style={{ color: "white" }}>{person.author}</SmalText>
-                <UltraSmall style={{ color: "#d6d6d6" }}>
-                  Description - '{person.description}'
-                </UltraSmall>
-              </DetailsContainer>
-              {/* <Bookdetails /> */}
-            </BottomContainer>
-          </Item>
-          )
-        })   } 
-        
- 
-      </Wrapper>
-    </div>
-  );
-}
+    }, */
