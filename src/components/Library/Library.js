@@ -187,7 +187,7 @@ export default function BottomAppBar() {
     let user = firebase.auth().currentUser;
     let userId = user.uid;
     //console.log(bookName, bookAuthor, description, imgSrc)
-
+    console.log(userId);
     let tagsArray = chosenTags.map(tag => tag.value)
 
 

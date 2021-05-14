@@ -15,9 +15,9 @@ import { Gmcard } from "./Gmcard";
   `;
 
 const Swipe = () => {
-  return (
+  return (  
            <Mainsxn />
-
+            
         //  <Gmcard/>
     );
 }

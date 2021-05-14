@@ -45,7 +45,7 @@ export function Bookdetails(props){
         <SpacedHorizontalContainer >
             <MediumText style={{color: "white"}}>Charlie and The Chocholate Factory</MediumText>
         </SpacedHorizontalContainer>
-        <SmallText style={{color: "grey"}}>            
+        <SmallText style={{color: "#d6d6d6"}}>            
             Author
         </SmallText>
         <UltraSmall  style={{color: "grey"}}>            
